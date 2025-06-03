@@ -1,27 +1,16 @@
-# the sample app is an expansion of ./01_simple_aabb_collision
-# but includes an in game map editor that saves map data to disk
-def tick args
-  # if it's the first tick, read the terrain data from disk
-  # and create the player
-  if Kernel.tick_count == 0
-    args.state.terrain = read_terrain_data args
+def init args
+  args.state.terrain = read_terrain_data args
 
-    args.state.player = {
-      x: 320,
-      y: 320,
-      w: 32,
-      h: 32,
-      dx: 0,
-      dy: 0,
-      path: 'sprites/square/red.png'
-    }
-  end
+  args.state.player = {
+    x: 320,
+    y: 320,
+    w: 32,
+    h: 32,
+    dx: 0,
+    dy: 0,
+    path: 'sprites/square/red.png'
+  }
 
-  # tick the game (where input and aabb collision is processed)
-  tick_game args
-
-  # tick the map editor
-  tick_map_editor args
 end
 
 def tick_game args
@@ -140,4 +129,17 @@ end
 def write_terrain_data args
   terrain_csv = args.state.terrain.map { |t| "#{t.x},#{t.y},#{t.w},#{t.h}" }.join "\n"
   args.gtk.write_file 'data/terrain.txt', terrain_csv
+end
+
+
+def tick args
+  if Kernel.tick_count == 0
+    init args
+  end
+
+  # tick the game (where input and aabb collision is processed)
+  tick_game args
+
+  # tick the map editor
+  tick_map_editor args
 end
