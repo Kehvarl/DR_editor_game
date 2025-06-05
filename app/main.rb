@@ -141,6 +141,7 @@ end
   # based on the direction of the player's movement and set the player's
   # dy to 0
   if collision
+    args.state.player.vy = 0
     if args.state.player.dy > 0
       args.state.player.y = collision.y - args.state.player.h
     elsif args.state.player.dy < 0
