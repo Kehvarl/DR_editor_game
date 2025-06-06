@@ -20,8 +20,11 @@ def init args
     vy: 0,
     path: 'sprites/square/red.png'
   }
-
 end
+
+# If can fall, then fall
+# if not falling, allow jump
+#
 
 def tick_game args
   # render terrain and player
