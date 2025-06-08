@@ -1,7 +1,7 @@
-devid=dragonruby
-devtitle=DragonRuby LLC
+devid=kehvarl
+devtitle=Kehvarl
 gameid=sample-app
-gametitle=Physics - With Map Editor
+gametitle=Sample App
 version=1.0
 icon=metadata/icon.png
 # HD and High DPI available via the Pro License
