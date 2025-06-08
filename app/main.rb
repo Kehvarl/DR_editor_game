@@ -20,14 +20,14 @@ end
 
 def cone args
     out = []
-    radius = 1280
+    radius = 960
     angle_from = -(args.state.player.x / radius) - Math::PI/2
     angle_to = (args.state.player.x / radius) + Math::PI/2
     angle_from.step(angle_to, (Math::PI / 36)) do |a|
         next if Math.cos(a) < 0
         x = 640 + (radius * Math.sin(a))
-        out << {x: x, y: 0, x2: 640, y2: 480, r: 64, g: 64, b: 64}.line!
-        out << {x: x, y: 720, x2: 640, y2: 480, r: 64, g: 64, b: 64}.line!
+        out << {x: x, y: 0, x2: 640, y2: 360, r: 64, g: 64, b: 64}.line!
+        out << {x: x, y: 720, x2: 640, y2: 360, r: 64, g: 64, b: 64}.line!
 
     end
     return out
