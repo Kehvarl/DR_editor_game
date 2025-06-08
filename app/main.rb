@@ -18,6 +18,21 @@ def init args
   }
 end
 
+def cone args
+    out = []
+    radius = 1280
+    angle_from = -(args.state.player.x / radius) - Math::PI/2
+    angle_to = (args.state.player.x / radius) + Math::PI/2
+    angle_from.step(angle_to, (Math::PI / 36)) do |a|
+        next if Math.cos(a) < 0
+        x = 640 + (radius * Math.sin(a))
+        out << {x: x, y: 0, x2: 640, y2: 480, r: 64, g: 64, b: 64}.line!
+        out << {x: x, y: 720, x2: 640, y2: 480, r: 64, g: 64, b: 64}.line!
+
+    end
+    return out
+end
+
 
 def tick args
   if Kernel.tick_count == 0
@@ -49,9 +64,7 @@ def tick args
 
   args.outputs.primitives << {x:0, y:0, w:1280, h:720, r: 128, g:128, b: 128}.solid!
 
-  -1280.step(3840, 100) do |x|
-      args.outputs.primitives << {x:x - args.state.player.x, y:0, x2:640, y2:480, r:64, g:64, b: 64}.line!
-  end
+  args.outputs.primitives << cone(args)
 
   args.outputs.primitives << args.state.player
 
