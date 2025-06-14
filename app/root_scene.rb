@@ -3,42 +3,60 @@ class RootScene
 
     def initialize args
         @args = args
-        @gradient =
-                80.map_with_index do |y|
-            {x: 0, y: y * 5, w: 1500, h: 15, r: 255, g: 64, b: 128, a: (y * 5).fdiv(255) * 255}.solid!
-        end
-        args.render_target(:gradient).solids << @gradient
+        precalculate_gradient
 
-        args.state.camera ||= {
-            x: 750,
-            y: 410,
-            target_x: 640,
-            target_y: 360,
+        state.camera = {
+            x: 0, y: 0,
+            target_x: 0, target_y: 0,
             target_scale: 1,
-            scale: 1.0
+            scale: 1
+        }
+
+        state.player = {
+            x: 0, y: 0,
+            w: 16, h: 16,
+            dx: 0, dy: 0,
+            on_ground: true
         }
     end
 
-    def calc_camera
-        ease = 0.1
-        cam = @args.state.camera
-        cam.scale += (cam.target_scale - cam.scale) * ease
-        cam.x += (cam.target_x - cam.x) * ease
-        cam.y += (cam.target_y - cam.y) * ease
+    def precalculate_gradient
+        @gradient = 80.map_with_index do |y|
+            {x: 0, y: y * 5, w: 1500, h: 15, r: 255, g: 64, b: 128, a: (y * 5).fdiv(255) * 255}.solid!
+        end
+        @args.render_target(:gradient).solids << @gradient
     end
 
-    def calc_bg
+    def calc_camera
+        state.camera.target_x = state.player[:x]
+        state.camera.target_y = state.player[:y]
+
+        ease = 0.1
+        state.camera.scale += (state.camera.target_scale - state.camera.scale) * ease
+        state.camera.x += (state.camera.target_x - state.camera.x) * ease
+        state.camera.y += (state.camera.target_y - state.camera.y) * ease
+    end
+
+    def draw_background
+        parallax_offset = state.offset * 0.05
+
         out = []
-        radius = 12800
-        angle_from = -(@args.state.offset / radius) - Math::PI/2
-        angle_to = (@args.state.offset/ radius) + Math::PI/2
-        angle_from.step(angle_to, (Math::PI / 180)) do |a|
+        out << {x: 0, y: 0, w: 1280, h: 720, r: 0, g: 0, b: 0}.solid!
+        out << {x: 0, y: 0, w: 1500, h: 1500, :path => :gradient}.sprite!
+
+        radius = 19200
+        angle_from = -(state.offset / radius) - Math::PI / 2
+        angle_to   =  (state.offset / radius) + Math::PI / 2
+
+        angle_from.step(angle_to, Math::PI / 240) do |a|
             next if Math.cos(a) < 0
-            x = 750 + (radius * Math.sin(a))
-            out << {x: x, y: 0, x2: 750, y2: 750, r: 64, g: 64, b: 64}.line!
+            x = 640 + (radius * Math.sin(a))
+            out << {x: x, y: 0, x2: 640, y2: 480,r: 64, g: 64, b: 64}.line!
         end
-        out << {x: 0, y: 700, w: 1500, h: 800, r: 0, g: 0, b: 0}.solid!
-        return out
+
+        out << {x: 0, y: 410, w: 1280, h: 320,r: 0, g: 0, b: 0}.solid!
+
+        outputs.primitives << out
     end
 
 
@@ -46,14 +64,16 @@ class RootScene
         @args.state.offset += @args.inputs.left_right * 2
         calc_camera
 
-        @args.outputs[:scene].transient!
-        @args.outputs[:scene].w = 1500
-        @args.outputs[:scene].h = 1500
-        @args.outputs[:scene].background_color = [0, 0, 0, 0]
-        @args.outputs[:scene].primitives << {x: 0, y: 0, w: 1500, h: 1500, :path => :gradient}.sprite!
-        @args.outputs[:scene].primitives << calc_bg
+        draw_background
 
-        @args.outputs.primitives << { **Camera.viewport, path: :scene }
+        outputs[:scene].transient!
+        outputs[:scene].w = 1500
+        outputs[:scene].h = 1500
+        outputs[:scene].background_color = [0, 0, 0, 0]
+
+        outputs[:scene].primitives << Camera.to_screen_space(state.camera, state.player.merge(path: "sprites/1-bit-platformer/0280.png")).sprite!
+
+        outputs.primitives << Camera.viewport.merge(path: :scene, primitive_marker: :sprite)
 
     end
 
