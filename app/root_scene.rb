@@ -59,9 +59,42 @@ class RootScene
         outputs.primitives << out
     end
 
+    def player_prefab
+        player = state.player
+        prefab = Camera.to_screen_space state.camera, (player.merge path: "sprites/1-bit-platformer/0280.png").sprite!
+
+        if !player.on_ground
+            prefab.merge! path: "sprites/1-bit-platformer/0284.png"
+            if player.dx > 0
+                prefab.merge! flip_horizontally: false
+            elsif player.dx < 0
+                prefab.merge! flip_horizontally: true
+            end
+        elsif player.dx > 0
+            frame_index = 0.frame_index 3, 5, true
+            prefab.merge! path: "sprites/1-bit-platformer/028#{frame_index + 1}.png"
+        elsif player.dx < 0
+            frame_index = 0.frame_index 3, 5, true
+            prefab.merge! path: "sprites/1-bit-platformer/028#{frame_index + 1}.png", flip_horizontally: true
+        end
+
+        prefab
+    end
+
 
     def tick
-        @args.state.offset += @args.inputs.left_right * 2
+
+        if inputs.keyboard.left
+            state.player.dx = -3
+        elsif inputs.keyboard.right
+            state.player.dx = 3
+        end
+
+        if inputs.keyboard.key_down.space && state.player.on_ground
+            state.player.dy = 10
+            state.player.on_ground = false
+        end
+        # @args.state.offset += @args.inputs.left_right * 2
         calc_camera
 
         draw_background
@@ -71,7 +104,7 @@ class RootScene
         outputs[:scene].h = 1500
         outputs[:scene].background_color = [0, 0, 0, 0]
 
-        outputs[:scene].primitives << Camera.to_screen_space(state.camera, state.player.merge(path: "sprites/1-bit-platformer/0280.png")).sprite!
+        outputs[:scene].primitives << player_prefab
 
         outputs.primitives << Camera.viewport.merge(path: :scene, primitive_marker: :sprite)
 
