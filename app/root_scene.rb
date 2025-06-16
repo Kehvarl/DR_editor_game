@@ -4,6 +4,7 @@ class RootScene
     def initialize args
         @args = args
         precalculate_gradient
+        state.gravity = 0.25
 
         state.camera = {
             x: 0, y: 0,
@@ -18,6 +19,11 @@ class RootScene
             dx: 0, dy: 0,
             on_ground: true
         }
+
+        state.terrain = []
+        0.step(1500, 32) do |x|
+            state.terrain << {x: x-750, y: -240, w: 32, h: 32, path: "sprites/square/green.png"}
+        end
     end
 
     def precalculate_gradient
@@ -81,6 +87,62 @@ class RootScene
         prefab
     end
 
+    def calc_physics
+        player = state.player
+        player.x += player.dx
+        collision = state.terrain.find do |t|
+            t.intersect_rect? player
+        end
+
+        if collision
+            if player.dx > 0
+                player.x = collision.x - player.w
+            else
+                player.x = collision.x + collision.w
+            end
+
+            player.dx = 0
+        end
+
+        player.dx *= 0.8
+        if player.dx.abs < 0.5
+            player.dx = 0
+        end
+
+        player.y += player.dy
+        player.on_ground = false
+
+        collision = state.terrain.find do |t|
+            t.intersect_rect? player
+        end
+
+        if collision
+            if player.dy > 0
+                player.y = collision.y - player.h
+            else
+                player.y = collision.y + collision.h
+                player.on_ground = true
+            end
+            player.dy = 0
+        end
+
+        player.dy -= state.gravity
+
+        if (player.y + player.h) < -750
+            player.y = 750
+            player.dy = 0
+        end
+    end
+
+    def draw_terrain
+        terrain_to_render = Camera.find_all_intersect_viewport(state.camera, state.terrain)
+        out = []
+        out << terrain_to_render.map do |m|
+            Camera.to_screen_space(state.camera, m)
+        end
+        out
+    end
+
 
     def tick
 
@@ -96,6 +158,7 @@ class RootScene
         end
         # @args.state.offset += @args.inputs.left_right * 2
         calc_camera
+        calc_physics
 
         draw_background
 
@@ -103,7 +166,7 @@ class RootScene
         outputs[:scene].w = 1500
         outputs[:scene].h = 1500
         outputs[:scene].background_color = [0, 0, 0, 0]
-
+        outputs[:scene].primitives << draw_terrain
         outputs[:scene].primitives << player_prefab
 
         outputs.primitives << Camera.viewport.merge(path: :scene, primitive_marker: :sprite)
