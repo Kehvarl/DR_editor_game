@@ -4,6 +4,7 @@ class RootScene
     def initialize args
         @args = args
         precalculate_gradient
+
         state.gravity = 0.25
 
         state.camera = {
@@ -44,15 +45,15 @@ class RootScene
     end
 
     def draw_background
-        parallax_offset = state.offset * 0.05
+        parallax_offset = state.player.x * 0.05
 
         out = []
         out << {x: 0, y: 0, w: 1280, h: 720, r: 0, g: 0, b: 0}.solid!
         out << {x: 0, y: 0, w: 1500, h: 1500, :path => :gradient}.sprite!
 
         radius = 19200
-        angle_from = -(state.offset / radius) - Math::PI / 2
-        angle_to   =  (state.offset / radius) + Math::PI / 2
+        angle_from = -(state.player.x / radius) - Math::PI / 2
+        angle_to   =  (state.player.x / radius) + Math::PI / 2
 
         angle_from.step(angle_to, Math::PI / 240) do |a|
             next if Math.cos(a) < 0
@@ -156,7 +157,7 @@ class RootScene
             state.player.dy = 10
             state.player.on_ground = false
         end
-        # @args.state.offset += @args.inputs.left_right * 2
+
         calc_camera
         calc_physics
 
