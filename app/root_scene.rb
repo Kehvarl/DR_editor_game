@@ -1,7 +1,10 @@
 class RootScene
     attr_gtk
 
-    def initialize args
+  attr :level_editor
+
+  def initialize args
+        @level_editor = LevelEditor.new
         @args = args
         initialize_gradient
         initialize_camera
@@ -23,7 +26,11 @@ class RootScene
         render_background
         render_scene
 
+        @level_editor.args = args
+        @level_editor.tick
+
         outputs.primitives << Camera.viewport.merge(path: :scene, primitive_marker: :sprite)
+
     end
 
     def initialize_gradient

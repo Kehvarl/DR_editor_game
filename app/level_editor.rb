@@ -77,15 +77,15 @@ class LevelEditor
   end
 
   def render
-    outputs.sprites << { x: 0, y: 0, w: 320, h: 320, path: :tilesheet }
+    outputs.primitives << { x: 0, y: 0, w: 320, h: 320, path: :tilesheet }.sprite!
 
     if @hovered_tile
-      outputs.sprites << { x: @hovered_tile.x,
+      outputs.primitives << { x: @hovered_tile.x,
                            y: @hovered_tile.y,
                            w: 16,
                            h: 16,
                            path: :pixel,
-                           r: 255, g: 0, b: 0, a: 128 }
+                           r: 255, g: 0, b: 0, a: 128 }.sprite!
     end
 
     if @selected_tile

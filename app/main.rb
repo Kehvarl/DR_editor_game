@@ -1,4 +1,5 @@
 require 'app/camera.rb'
+require 'app/level_editor.rb'
 require 'app/root_scene.rb'
 
 def init args
