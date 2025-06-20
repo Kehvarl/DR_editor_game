@@ -1,4 +1,5 @@
 class RootScene
+    # migraine
     attr_gtk
 
   attr :level_editor
